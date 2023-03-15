@@ -1,10 +1,13 @@
 """ 
+
 Things to do:
     - Save data to a CSV File
+    - Open data from a CSV File
     - Use the re.match() functionality to process the USB data
         r"^ [012] $" should match " 0 ", " 1 ", and " 2 "
         use that as a delimiter to isolate the data and process
         the channels individually
+
 """
 
 import matplotlib.pyplot as plt # for plotting
@@ -13,6 +16,7 @@ import keyboard # for ctrl-c quitting functionality
 import serial # for reading USB data
 import re # for processing text 
 import numpy as np # for graphing functions
+import csv # for logging and loading data
 
 import random # Possibly delete in future
 
@@ -41,16 +45,25 @@ except serial.SerialException:
     ser = serial.Serial('/dev/ttyUSB1', 9600, timeout=1)
     # Try the next port incase 2 usb devices are plugged in
 
-def checkIfQuit(): # Ctrl-c quitting functionality
+def checkIfCtrlC(): # Ctrl-c quitting functionality
     if keyboard.is_pressed('ctrl') and keyboard.is_pressed('c'):
         ser.close() # Close serial connection
         exit() # Kill program
 
+
 def animate(i):
+
+################################################################################
+
     reading = ser.readline().decode('utf-8')
     # Save each line of serial input
 
-    print(reading) ######### Add regex filtering here #########
+    match = re.match(r" [012] ", reading)
+    
+    if match:
+        print(reading) ######### Add regex filtering here #########
+
+################################################################################
 
     ax1.cla()
     ax2.cla()
@@ -72,14 +85,14 @@ def animate(i):
     Pdata.append(random.uniform(0, 30))
     # Update data points
 
-    ax2.scatter(Vdata[-(SIZE+1):-1], Pdata[-(SIZE+1):-1], \
+    ax2.scatter(Vdata[-SIZE:-1], Pdata[-SIZE:-1], \
             marker='o', color='red')
     # Real-time data except the most recent data point
 
     ax2.scatter(Vdata[-1], Pdata[-1], marker='o', color='blue')
     # Real-time most recent data point
 
-    checkIfQuit()
+    checkIfCtrlC()
 
 
 

@@ -46,13 +46,22 @@ def checkIfCtrlC(): # Ctrl-c quitting functionality
         ser.close() # Close serial connection
         exit() # Kill program
 
+
 date = datetime.datetime.now().strftime("%B-%d-%H-%M-%S")
 
 with open('logs/VIVPcurves.csv', 'r') as curvesFile, \
-    open(f'logs/measured-data-{date}.csv', 'w') as dataFile:
+    open(f'logs/measured-data-{date}.csv', 'w', newline='') as dataFile:
+    # Opening files for curves to plot and data to log
 
+    writer = csv.writer(dataFile)
+    reader = csv.reader(curvesFile)
+    # Open csv I/O objects
 
-    def getChAndMeasurement(line):
+    writer.writerow(["CH0", "CH1", "CH2"])
+    
+    data2csv = [1000, 1000, 1000]
+
+    def getChAndMeasurement(line, dataAuto):
         try:
             line = ser.readline().decode('utf-8')
         except UnicodeDecodeError:
@@ -71,20 +80,37 @@ with open('logs/VIVPcurves.csv', 'r') as curvesFile, \
         float_match = re.search(r'\d+\.\d+', line) 
         if float_match:
             measurement = float(float_match.group())
-            print(f"Float {measurement}")
+            # print(f"Float {measurement}")
         # Collect floats using regular expressions
     
         int_match = re.search(r'\d+', line)
         if int_match:
             channel = int(int_match.group())
-            print(f"Int {channel}")
+            # print(f"Int {channel}")
         # Collect ints using regular expressions
+
         
-    
-    
+        if channel < 4:
+            dataAuto[channel] = measurement
+        # Save data to temporary list
+
+        if not 1000 in dataAuto:
+            writer.writerow(dataAuto)
+            dataAuto = [1000, 1000, 1000]
+        # These two if statements ensure all 3 data points have been collected
+        # before writing to the csv
+        return [channel, measurement]
+
+
+
     def animate(i):
     
-        getChAndMeasurement(reading)
+        chAndMeasurement = getChAndMeasurement(reading, data2csv)
+        print(chAndMeasurement)
+        chAndMeasurement = getChAndMeasurement(reading, data2csv)
+        print(chAndMeasurement)
+        chAndMeasurement = getChAndMeasurement(reading, data2csv)
+        print(chAndMeasurement)
     
         ax1.cla()
         ax2.cla()

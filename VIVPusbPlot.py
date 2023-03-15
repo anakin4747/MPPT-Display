@@ -1,6 +1,6 @@
 """ 
 Things to do:
-    - Open data from a CSV File
+    - Open data from a CSV File to plot a curve
 """
 
 import matplotlib.pyplot as plt # for plotting
@@ -8,13 +8,12 @@ from matplotlib.animation import FuncAnimation # for live data
 import keyboard # for ctrl-c quitting functionality
 import serial # for reading USB data
 import re # for processing text 
-import numpy as np # for graphing functions
 import csv # for logging and loading data
 import time # for waiting to retry serial read
 import datetime # for dating files
 
-import random # Possibly delete in future
-
+import numpy as np # for graphing functions
+# Possibly delete if you stop using linspace()
 
 SIZE = 10 # Practically a define but its not C so its a variable
 
@@ -65,7 +64,7 @@ with open('logs/VIVPcurves.csv', 'r') as curvesFile, \
 
         count = 0
 
-        while count < 3:
+        while count < 3: # Get 3 measurements
             try:
                 line = ser.readline().decode('utf-8')
             except UnicodeDecodeError:
@@ -93,18 +92,26 @@ with open('logs/VIVPcurves.csv', 'r') as curvesFile, \
 
             if channel < 4:
                 data2csv[channel] = measurement
+            # Make sure its a valid channel
 
             count += 1
 
-
         if 1000 not in data2csv:
             writer.writerow(data2csv)
-            return data2csv
+
+        return data2csv
 
 
     def animate(i):
     
         measurements = getMeasurements(reading)
+
+        """
+            Ch0 input voltage
+            Ch1 input current
+            Ch2 battery voltage
+            
+        """
     
         ax1.cla()
         ax2.cla()
@@ -122,8 +129,8 @@ with open('logs/VIVPcurves.csv', 'r') as curvesFile, \
         # Label kept over lapping the ax1.ylabel - this fixed it
         ax2.yaxis.set_label_coords(1.075, 0.5)
     
-        Vdata.append(random.uniform(0, 6))
-        Pdata.append(random.uniform(0, 30))
+        Vdata.append(measurements[0])
+        Pdata.append(measurements[0] * measurements[1])
         # Update data points
     
         ax2.scatter(Vdata[-SIZE:-1], Pdata[-SIZE:-1], \

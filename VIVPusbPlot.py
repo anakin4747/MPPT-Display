@@ -59,58 +59,54 @@ with open('logs/VIVPcurves.csv', 'r') as curvesFile, \
 
     writer.writerow(["CH0", "CH1", "CH2"])
     
-    data2csv = [1000, 1000, 1000]
 
-    def getChAndMeasurement(line, dataAuto):
-        try:
-            line = ser.readline().decode('utf-8')
-        except UnicodeDecodeError:
-            print("Retrying USB read")
-            time.sleep(0.01)
-            line = ser.readline().decode('utf-8')
-        # Reading from USB
-    
-        channel = 4
-        measurement = 747.747
-    
-        if "\x1b[2J\x1b[H" in line:
-            line = line.replace("\x1b[2J\x1b[H", "")
-        # Filter out screen clearing escape characters
-    
-        float_match = re.search(r'\d+\.\d+', line) 
-        if float_match:
-            measurement = float(float_match.group())
-            # print(f"Float {measurement}")
-        # Collect floats using regular expressions
-    
-        int_match = re.search(r'\d+', line)
-        if int_match:
-            channel = int(int_match.group())
-            # print(f"Int {channel}")
-        # Collect ints using regular expressions
+    def getChAndMeasurement(line):
+        data2csv = [1000, 1000, 1000]
 
+        count = 0
+
+        while count < 3:
+            try:
+                line = ser.readline().decode('utf-8')
+            except UnicodeDecodeError:
+                print("Retrying USB read")
+                time.sleep(0.01)
+                line = ser.readline().decode('utf-8')
+            # Reading from USB
         
-        if channel < 4:
-            dataAuto[channel] = measurement
-        # Save data to temporary list
+            channel = 4
+            measurement = 747.747
+        
+            if "\x1b[2J\x1b[H" in line:
+                line = line.replace("\x1b[2J\x1b[H", "")
+            # Filter out screen clearing escape characters
+        
+            float_match = re.search(r'\d+\.\d+', line) 
+            if float_match:
+                measurement = float(float_match.group())
+                # print(f"Float {measurement}")
+            # Collect floats using regular expressions
+        
+            int_match = re.search(r'\d+', line)
+            if int_match:
+                channel = int(int_match.group())
+                # print(f"Int {channel}")
+            # Collect ints using regular expressions
 
-        if not 1000 in dataAuto:
-            writer.writerow(dataAuto)
-            dataAuto = [1000, 1000, 1000]
-        # These two if statements ensure all 3 data points have been collected
-        # before writing to the csv
-        return [channel, measurement]
+            if channel < 4:
+                data2csv[channel] = measurement
 
+            count += 1
+
+
+        if 1000 not in data2csv:
+            writer.writerow(data2csv)
+        
 
 
     def animate(i):
     
-        chAndMeasurement = getChAndMeasurement(reading, data2csv)
-        print(chAndMeasurement)
-        chAndMeasurement = getChAndMeasurement(reading, data2csv)
-        print(chAndMeasurement)
-        chAndMeasurement = getChAndMeasurement(reading, data2csv)
-        print(chAndMeasurement)
+        getChAndMeasurement(reading)
     
         ax1.cla()
         ax2.cla()

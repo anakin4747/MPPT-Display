@@ -1,13 +1,7 @@
 """ 
-
 Things to do:
     - Save data to a CSV File
     - Open data from a CSV File
-    - Use the re.match() functionality to process the USB data
-        r"^ [012] $" should match " 0 ", " 1 ", and " 2 "
-        use that as a delimiter to isolate the data and process
-        the channels individually
-
 """
 
 import matplotlib.pyplot as plt # for plotting
@@ -17,6 +11,8 @@ import serial # for reading USB data
 import re # for processing text 
 import numpy as np # for graphing functions
 import csv # for logging and loading data
+import time # for waiting to retry serial read
+import datetime # for dating files
 
 import random # Possibly delete in future
 
@@ -50,55 +46,81 @@ def checkIfCtrlC(): # Ctrl-c quitting functionality
         ser.close() # Close serial connection
         exit() # Kill program
 
+date = datetime.datetime.now().strftime("%B-%d-%H-%M-%S")
 
-def animate(i):
+with open('logs/VIVPcurves.csv', 'r') as curvesFile, \
+    open(f'logs/measured-data-{date}.csv', 'w') as dataFile:
 
-################################################################################
 
-    reading = ser.readline().decode('utf-8')
-    # Save each line of serial input
-
-    match = re.match(r" [012] ", reading)
+    def getChAndMeasurement(line):
+        try:
+            line = ser.readline().decode('utf-8')
+        except UnicodeDecodeError:
+            print("Retrying USB read")
+            time.sleep(0.01)
+            line = ser.readline().decode('utf-8')
+        # Reading from USB
     
-    if match:
-        print(reading) ######### Add regex filtering here #########
-
-################################################################################
-
-    ax1.cla()
-    ax2.cla()
-    # Clear each axes
-
-    ax1.plot(VLine, ILine, linestyle='--', linewidth=1.5)
-    # Setting line weight and style
-    ax1.set_xlabel('Voltage (V)')
-    ax1.set_ylabel('Current (A)')
-    # Setting axis labels
-
-    ax2.plot(VLine, PLine, linestyle='--', linewidth=1.5)
-    # Setting line weight and style
-    ax2.set_ylabel('Power (W)', labelpad=15)
-    # Label kept over lapping the ax1.ylabel - this fixed it
-    ax2.yaxis.set_label_coords(1.075, 0.5)
-
-    Vdata.append(random.uniform(0, 6))
-    Pdata.append(random.uniform(0, 30))
-    # Update data points
-
-    ax2.scatter(Vdata[-SIZE:-1], Pdata[-SIZE:-1], \
-            marker='o', color='red')
-    # Real-time data except the most recent data point
-
-    ax2.scatter(Vdata[-1], Pdata[-1], marker='o', color='blue')
-    # Real-time most recent data point
-
-    checkIfCtrlC()
-
-
-
-ani = FuncAnimation(plt.gcf(), animate, interval=100)
-# Animate every 100ms
-
-plt.tight_layout()
-plt.show()
-
+        channel = 4
+        measurement = 747.747
+    
+        if "\x1b[2J\x1b[H" in line:
+            line = line.replace("\x1b[2J\x1b[H", "")
+        # Filter out screen clearing escape characters
+    
+        float_match = re.search(r'\d+\.\d+', line) 
+        if float_match:
+            measurement = float(float_match.group())
+            print(f"Float {measurement}")
+        # Collect floats using regular expressions
+    
+        int_match = re.search(r'\d+', line)
+        if int_match:
+            channel = int(int_match.group())
+            print(f"Int {channel}")
+        # Collect ints using regular expressions
+        
+    
+    
+    def animate(i):
+    
+        getChAndMeasurement(reading)
+    
+        ax1.cla()
+        ax2.cla()
+        # Clear each axes
+    
+        ax1.plot(VLine, ILine, linestyle='--', linewidth=1.5)
+        # Setting line weight and style
+        ax1.set_xlabel('Voltage (V)')
+        ax1.set_ylabel('Current (A)')
+        # Setting axis labels
+    
+        ax2.plot(VLine, PLine, linestyle='--', linewidth=1.5)
+        # Setting line weight and style
+        ax2.set_ylabel('Power (W)', labelpad=15)
+        # Label kept over lapping the ax1.ylabel - this fixed it
+        ax2.yaxis.set_label_coords(1.075, 0.5)
+    
+        Vdata.append(random.uniform(0, 6))
+        Pdata.append(random.uniform(0, 30))
+        # Update data points
+    
+        ax2.scatter(Vdata[-SIZE:-1], Pdata[-SIZE:-1], \
+                marker='o', color='red')
+        # Real-time data except the most recent data point
+    
+        ax2.scatter(Vdata[-1], Pdata[-1], marker='o', color='blue')
+        # Real-time most recent data point
+    
+        checkIfCtrlC()
+    
+    
+    
+    ani = FuncAnimation(plt.gcf(), animate, interval=100, \
+            cache_frame_data=False)
+    # Run animate function every 100ms, don't cache data to suppress error
+    
+    plt.tight_layout() # Formatting
+    plt.show() # Plot plt
+    

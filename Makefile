@@ -19,5 +19,5 @@ deps: venv
 
 # Clean up generated files
 clean:
-	rm -i ./logs/*
+	rm logs/measured*
 

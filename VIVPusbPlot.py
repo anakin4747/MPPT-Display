@@ -106,6 +106,10 @@ with open('logs/VIVPcurves.csv', 'r') as curvesFile, \
     
         measurements = getMeasurements(reading)
 
+        print("Ch0 - Input Voltage = {:5.3f} Volts\t".format(measurements[0]) + \
+            "Ch1 - Input Current = {:5.3f} Amps\t".format(measurements[1]) + \
+            "Ch2 - Battery Voltage = {:5.3f} Volts".format(measurements[2]))
+
         """
             Ch0 input voltage
             Ch1 input current

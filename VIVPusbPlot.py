@@ -1,6 +1,5 @@
 """ 
 Things to do:
-    - Save data to a CSV File
     - Open data from a CSV File
 """
 
@@ -58,9 +57,10 @@ with open('logs/VIVPcurves.csv', 'r') as curvesFile, \
     # Open csv I/O objects
 
     writer.writerow(["CH0", "CH1", "CH2"])
+    # Label columns
     
 
-    def getChAndMeasurement(line):
+    def getMeasurements(line):
         data2csv = [1000, 1000, 1000]
 
         count = 0
@@ -84,13 +84,11 @@ with open('logs/VIVPcurves.csv', 'r') as curvesFile, \
             float_match = re.search(r'\d+\.\d+', line) 
             if float_match:
                 measurement = float(float_match.group())
-                # print(f"Float {measurement}")
             # Collect floats using regular expressions
         
             int_match = re.search(r'\d+', line)
             if int_match:
                 channel = int(int_match.group())
-                # print(f"Int {channel}")
             # Collect ints using regular expressions
 
             if channel < 4:
@@ -101,12 +99,12 @@ with open('logs/VIVPcurves.csv', 'r') as curvesFile, \
 
         if 1000 not in data2csv:
             writer.writerow(data2csv)
-        
+            return data2csv
 
 
     def animate(i):
     
-        getChAndMeasurement(reading)
+        measurements = getMeasurements(reading)
     
         ax1.cla()
         ax2.cla()
@@ -136,7 +134,6 @@ with open('logs/VIVPcurves.csv', 'r') as curvesFile, \
         # Real-time most recent data point
     
         checkIfCtrlC()
-    
     
     
     ani = FuncAnimation(plt.gcf(), animate, interval=100, \

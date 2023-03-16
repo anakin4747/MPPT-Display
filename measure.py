@@ -8,6 +8,12 @@ def getMeasurements(line, ser):
 
     count = 0
 
+    """
+    Change the stuff below to not be a while loop but collects 3 lines
+    and then performs list comprehensions on the lines for filtering
+
+    """
+
     while count < 3: # Get 3 measurements
         try:
             line = ser.readline().decode('utf-8')
@@ -20,9 +26,6 @@ def getMeasurements(line, ser):
         channel = 4
         measurement = 747.747
     
-        if "\x1b[2J\x1b[H" in line:
-            line = line.replace("\x1b[2J\x1b[H", "")
-        # Filter out screen clearing escape characters
     
         float_match = re.search(r'\d+\.\d+', line) 
         if float_match:

@@ -30,6 +30,7 @@ fig, ax1 = plt.subplots() # Create plot object
 ax2 = ax1.twinx() # Create a second y axis
 
 Vdata = []
+Idata = []
 Pdata = []
 reading = ""
 # Declaring arrays that will grow
@@ -85,14 +86,22 @@ with open('logs/VIVPcurves.csv', 'r') as curvesFile, \
         ax2.yaxis.set_label_coords(1.075, 0.5)
     
         Vdata.append(measurements[0])
+        Idata.append(measurements[1])
         Pdata.append(measurements[0] * measurements[1])
         # Update data points
-    
-        ax2.scatter(Vdata[-SIZE:-1], Pdata[-SIZE:-1], \
-                marker='o', color='red')
+
+        ax1.scatter(Vdata[-SIZE:-1], Idata[-SIZE:-1], \
+                marker='o', color='orange')
         # Real-time data except the most recent data point
     
-        ax2.scatter(Vdata[-1], Pdata[-1], marker='o', color='blue')
+        ax1.scatter(Vdata[-1], Idata[-1], marker='o', color='red')
+        # Real-time most recent data point
+    
+        ax2.scatter(Vdata[-SIZE:-1], Pdata[-SIZE:-1], \
+                marker='o', color='blue')
+        # Real-time data except the most recent data point
+    
+        ax2.scatter(Vdata[-1], Pdata[-1], marker='o', color='purple')
         # Real-time most recent data point
     
         checkIfCtrlC()

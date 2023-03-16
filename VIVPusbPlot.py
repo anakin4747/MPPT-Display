@@ -5,24 +5,26 @@ Things to do:
 
 import matplotlib.pyplot as plt # for plotting
 from matplotlib.animation import FuncAnimation # for live data
-import keyboard # for ctrl-c quitting functionality
 from connect2Device import connect2USB # for reading USB data
-import re # for processing text 
+from measure import getMeasurements # for extracting data from USB
+import keyboard # for ctrl-c quitting functionality
 import csv # for logging and loading data
-import time # for waiting to retry serial read
 import datetime # for dating files
 
-import numpy as np # for graphing functions
-# Possibly delete if you stop using linspace()
 
 SIZE = 10 # Practically a define but its not C so its a variable
 
 plt.style.use('fivethirtyeight') # Plot style
 
+############################################################
+import numpy as np # for graphing functions
+# Possibly delete if you stop using linspace()
+
 VLine = np.linspace(0, 6, 14)
 ILine = np.linspace(0, 6, 14)
 PLine = np.linspace(30, 0, 14)
 # This will get replaced by measured values
+############################################################
 
 fig, ax1 = plt.subplots() # Create plot object
 ax2 = ax1.twinx() # Create a second y axis
@@ -33,6 +35,7 @@ reading = ""
 # Declaring arrays that will grow
 
 ser = connect2USB()
+# Connect to USB with error handling
 
 def checkIfCtrlC(): # Ctrl-c quitting functionality
     if keyboard.is_pressed('ctrl') and keyboard.is_pressed('c'):
@@ -54,56 +57,16 @@ with open('logs/VIVPcurves.csv', 'r') as curvesFile, \
     # Label columns
     
 
-    def getMeasurements(line):
-        data2csv = [1000, 1000, 1000]
-
-        count = 0
-
-        while count < 3: # Get 3 measurements
-            try:
-                line = ser.readline().decode('utf-8')
-            except UnicodeDecodeError:
-                print("Retrying USB read")
-                time.sleep(0.01)
-                line = ser.readline().decode('utf-8')
-            # Reading from USB
-        
-            channel = 4
-            measurement = 747.747
-        
-            if "\x1b[2J\x1b[H" in line:
-                line = line.replace("\x1b[2J\x1b[H", "")
-            # Filter out screen clearing escape characters
-        
-            float_match = re.search(r'\d+\.\d+', line) 
-            if float_match:
-                measurement = float(float_match.group())
-            # Collect floats using regular expressions
-        
-            int_match = re.search(r'\d+', line)
-            if int_match:
-                channel = int(int_match.group())
-            # Collect ints using regular expressions
-
-            if channel < 4:
-                data2csv[channel] = measurement
-            # Make sure its a valid channel
-
-            count += 1
-
-        if 1000 not in data2csv:
-            writer.writerow(data2csv)
-
-        return data2csv
-
-
     def animate(i):
     
-        measurements = getMeasurements(reading)
+        measurements = getMeasurements(reading, ser)
 
-        print("Ch0 - Input Voltage = {:5.3f} Volts\t".format(measurements[0]) + \
-            "Ch1 - Input Current = {:5.3f} Amps\t".format(measurements[1]) + \
-            "Ch2 - Battery Voltage = {:5.3f} Volts".format(measurements[2]))
+        if 1000 not in measurements:
+            writer.writerow(measurements)
+
+        print("Ch0 - Input Voltage = {:6.3f} Volts\t".format(measurements[0]) + \
+            "Ch1 - Input Current = {:6.3f} Amps\t".format(measurements[1]) + \
+            "Ch2 - Battery Voltage = {:6.3f} Volts".format(measurements[2]))
     
         ax1.cla()
         ax2.cla()

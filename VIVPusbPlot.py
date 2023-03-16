@@ -6,7 +6,7 @@ Things to do:
 import matplotlib.pyplot as plt # for plotting
 from matplotlib.animation import FuncAnimation # for live data
 import keyboard # for ctrl-c quitting functionality
-import serial # for reading USB data
+from connect2Device import connect2USB # for reading USB data
 import re # for processing text 
 import csv # for logging and loading data
 import time # for waiting to retry serial read
@@ -32,12 +32,7 @@ Pdata = []
 reading = ""
 # Declaring arrays that will grow
 
-try:
-    ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
-    # Create a serial port object
-except serial.SerialException:
-    ser = serial.Serial('/dev/ttyUSB1', 9600, timeout=1)
-    # Try the next port incase 2 usb devices are plugged in
+ser = connect2USB()
 
 def checkIfCtrlC(): # Ctrl-c quitting functionality
     if keyboard.is_pressed('ctrl') and keyboard.is_pressed('c'):
@@ -109,13 +104,6 @@ with open('logs/VIVPcurves.csv', 'r') as curvesFile, \
         print("Ch0 - Input Voltage = {:5.3f} Volts\t".format(measurements[0]) + \
             "Ch1 - Input Current = {:5.3f} Amps\t".format(measurements[1]) + \
             "Ch2 - Battery Voltage = {:5.3f} Volts".format(measurements[2]))
-
-        """
-            Ch0 input voltage
-            Ch1 input current
-            Ch2 battery voltage
-            
-        """
     
         ax1.cla()
         ax2.cla()

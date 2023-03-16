@@ -6,7 +6,7 @@ PROJECT_NAME := VIVPusbPlot.py
 
 # Default target runs project
 run:
-	sudo $(PYTHON) $(PROJECT_NAME)
+	@sudo $(PYTHON) $(PROJECT_NAME)
 
 # Set up virtual environment
 venv:

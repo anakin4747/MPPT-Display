@@ -17,6 +17,7 @@ To track the performance of our MPPT, I created a Python script which reads seri
 
 <p align="center">
   <img src=".docs/optimize.gif" alt="Alt Text" />
+  
   Real-Time Plot of Measured Input Voltage, Current, and Power
 </p>
 

@@ -17,7 +17,7 @@ To track the performance of our MPPT, I created a Python script which reads seri
 
 <p align="center">
   <img src=".docs/optimize.gif" alt="Alt Text" />
-  Real-Time Plot of Measured Input Voltage, Current, and Power
+  <p align="center">Real-Time Plot of Measured Input Voltage, Current, and Power</p>
 </p>
 
 The script takes the measured values coming in on the USB port and calculates the power to plot the performance of the MPPT. The yellow data points are the current vs voltage measurements with the red data point being the most recent point. The blue data points are the power vs voltage measurements with the purple data point being the most recent point.

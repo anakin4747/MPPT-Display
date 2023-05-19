@@ -13,6 +13,7 @@ This voltage is Vmp in the above image. Operating a MPPT at this voltage facilit
 
 To track the performance of our MPPT, I created a Python script which reads serial data from our MPPT and plots the PV characteristics in real-time. The script also logs the values in a CSV file.
 
-![](.docs/pv-char.gif)
+<!-- ![](.docs/pv-char.gif) -->
+![](.docs/optimize.gif)
 
 Sadly, Western decided Electrical Engineer was the one discipline that didn't need a showcase to demonstate our final projects so I stopped working on this as other parts of the project became more important.
